@@ -190,10 +190,11 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
         textResult.setText( result.substring(0,1).toUpperCase() + result.substring(1));
         speechRecognizer.stopListening();
         listenSpeech = false;
+        speechProgress.setVisibility(View.GONE);
 
         if (writeAnswer.contains(result)){
-            speechProgress.setVisibility(View.GONE);
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(focus, 13));
+            card.setVisibility(View.GONE);
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(focus, 13));
 
             map.addMarker(new MarkerOptions()
                     .title("Sydney")
