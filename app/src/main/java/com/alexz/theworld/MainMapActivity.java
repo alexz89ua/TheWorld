@@ -2,10 +2,15 @@ package com.alexz.theworld;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 import com.alexz.theworld.utils.RippleDrawable;
@@ -15,17 +20,24 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 
-public class MainMapActivity extends Activity {
+
+public class MainMapActivity extends Activity implements RecognitionListener, View.OnClickListener {
+    private SpeechRecognizer speechRecognizer;
     private View mDecorView;
     private GoogleMap map;
     private RelativeLayout card;
+    private boolean listenSpeech = false;
+    private ProgressBar speechProgres;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mDecorView = getWindow().getDecorView();
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(getApplicationContext());
+        speechRecognizer.setRecognitionListener(this);
 
         // Get a handle to the Map Fragment
         map = ((MapFragment) getFragmentManager()
@@ -46,17 +58,15 @@ public class MainMapActivity extends Activity {
     }
 
 
+    private void initViews() {
 
-    private void initViews(){
         card = (RelativeLayout) findViewById(R.id.card);
         RippleDrawable.createRipple(card, getResources().getColor(R.color.material_blue_600));
+        ImageButton speech = (ImageButton) findViewById(R.id.speech);
 
-        card.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                card.setVisibility(View.GONE);
-            }
-        });
+        speech.setOnClickListener(this);
+        card.setOnClickListener(this);
+        speechProgres = (ProgressBar) findViewById(R.id.speechProgress);
 
         map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
@@ -97,4 +107,82 @@ public class MainMapActivity extends Activity {
             }
         }
     }
+
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.card:
+                card.setVisibility(View.GONE);
+                break;
+            case R.id.speech:
+                if (!listenSpeech) {
+                    speechRecognizer.startListening(RecognizerIntent.getVoiceDetailsIntent(getApplicationContext()));
+                    listenSpeech = true;
+                    speechProgres.setVisibility(View.VISIBLE);
+                } else {
+                    speechRecognizer.stopListening();
+                    listenSpeech = false;
+                    speechProgres.setVisibility(View.GONE);
+                }
+                break;
+        }
+    }
+
+
+    @Override
+    public void onReadyForSpeech(Bundle params) {
+        Log.d("Loger", "onReadyForSpeech");
+    }
+
+    @Override
+    public void onBeginningOfSpeech() {
+        Log.d("Loger", "onBeginningOfSpeech");
+    }
+
+    @Override
+    public void onRmsChanged(float rmsdB) {
+        Log.d("Loger", "onRmsChanged");
+    }
+
+    @Override
+    public void onBufferReceived(byte[] buffer) {
+        Log.d("Loger", "onBufferReceived");
+    }
+
+    @Override
+    public void onEndOfSpeech() {
+        Log.d("Loger", "onEndOfSpeech");
+    }
+
+    @Override
+    public void onError(int error) {
+        Log.d("Loger", "onError");
+        listenSpeech = false;
+        speechProgres.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onResults(Bundle results) {
+        Log.d("Loger", "onResults");
+        ArrayList strlist = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+        for (int i = 0; i < strlist.size(); i++) {
+            Log.d("Loger", "result=" + strlist.get(i));
+        }
+        speechRecognizer.stopListening();
+        listenSpeech = false;
+        speechProgres.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onPartialResults(Bundle partialResults) {
+        Log.d("Loger", "onPartialResults");
+    }
+
+    @Override
+    public void onEvent(int eventType, Bundle params) {
+        Log.d("Loger", "onEvent");
+    }
+
+
 }

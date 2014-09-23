@@ -18,6 +18,30 @@
         android:id="@+id/card"
         android:background="@drawable/question_shape"
         android:visibility="gone">
+
+
+        <ImageButton
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="18dp"
+            android:scaleType="centerCrop"
+            android:id="@+id/speech"
+            android:src="@drawable/speech"
+            android:background="@null"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"/>
+
+
+        <ProgressBar
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="18dp"
+            android:id="@+id/speechProgress"
+            android:src="@drawable/speech"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:visibility="gone"/>
+
     </RelativeLayout>
 
 
