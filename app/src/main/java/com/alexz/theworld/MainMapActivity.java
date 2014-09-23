@@ -65,7 +65,6 @@ public class MainMapActivity extends Activity implements RecognitionListener, Vi
         card = (RelativeLayout) findViewById(R.id.card);
         RippleDrawable.createRipple(card, getResources().getColor(R.color.material_blue_600));
         ImageButton speech = (ImageButton) findViewById(R.id.speech);
-
         speech.setOnClickListener(this);
         card.setOnClickListener(this);
         speechProgress = (ProgressBar) findViewById(R.id.speechProgress);
