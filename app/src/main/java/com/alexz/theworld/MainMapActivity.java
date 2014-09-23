@@ -5,7 +5,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.RelativeLayout;
 
+import com.alexz.theworld.utils.RippleDrawable;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -15,6 +18,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainMapActivity extends Activity {
     private View mDecorView;
+    private GoogleMap map;
+    private RelativeLayout card;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,18 +28,42 @@ public class MainMapActivity extends Activity {
         mDecorView = getWindow().getDecorView();
 
         // Get a handle to the Map Fragment
-        GoogleMap map = ((MapFragment) getFragmentManager()
+        map = ((MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map)).getMap();
 
-        LatLng sydney = new LatLng(-33.867, 151.206);
+        map.setMyLocationEnabled(false);
+        map.getUiSettings().setZoomControlsEnabled(false);
 
-        map.setMyLocationEnabled(true);
+        LatLng sydney = new LatLng(-33.867, 151.206);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 13));
 
         map.addMarker(new MarkerOptions()
                 .title("Sydney")
                 .snippet("The most populous city in Australia.")
                 .position(sydney));
+
+        initViews();
+    }
+
+
+
+    private void initViews(){
+        card = (RelativeLayout) findViewById(R.id.card);
+        RippleDrawable.createRipple(card, getResources().getColor(R.color.material_blue_600));
+
+        card.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                card.setVisibility(View.GONE);
+            }
+        });
+
+        map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                card.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
 

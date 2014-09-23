@@ -33,4 +33,5 @@ dependencies {
     compile 'com.google.code.gson:gson:2.3'
     compile 'com.android.support:appcompat-v7:20.+'
     compile 'com.google.android.gms:play-services:4.+'
+    compile 'com.nineoldandroids:library:2.4.0'
 }
