@@ -192,13 +192,13 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
         listenSpeech = false;
 
         if (writeAnswer.contains(result)){
+            speechProgress.setVisibility(View.GONE);
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(focus, 13));
 
             map.addMarker(new MarkerOptions()
                     .title("Sydney")
                     .snippet("The most populous city in Australia.")
                     .position(focus));
-            speechProgress.setVisibility(View.GONE);
         }
     }
 
