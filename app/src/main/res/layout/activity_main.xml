@@ -42,6 +42,16 @@
             android:layout_alignParentRight="true"
             android:visibility="gone"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/text_result"
+            android:textColor="@android:color/secondary_text_dark"
+            android:textSize="22sp"
+            android:layout_alignTop="@+id/speech"
+            android:layout_toLeftOf="@+id/speech"
+            android:layout_toStartOf="@+id/speech" />
+
     </RelativeLayout>
 
 

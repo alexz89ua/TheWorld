@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.alexz.theworld.utils.RippleDrawable;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -29,7 +30,8 @@ public class MainMapActivity extends Activity implements RecognitionListener, Vi
     private GoogleMap map;
     private RelativeLayout card;
     private boolean listenSpeech = false;
-    private ProgressBar speechProgres;
+    private ProgressBar speechProgress;
+    private TextView textResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +68,8 @@ public class MainMapActivity extends Activity implements RecognitionListener, Vi
 
         speech.setOnClickListener(this);
         card.setOnClickListener(this);
-        speechProgres = (ProgressBar) findViewById(R.id.speechProgress);
+        speechProgress = (ProgressBar) findViewById(R.id.speechProgress);
+        textResult = (TextView) findViewById(R.id.text_result);
 
         map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
@@ -119,11 +122,11 @@ public class MainMapActivity extends Activity implements RecognitionListener, Vi
                 if (!listenSpeech) {
                     speechRecognizer.startListening(RecognizerIntent.getVoiceDetailsIntent(getApplicationContext()));
                     listenSpeech = true;
-                    speechProgres.setVisibility(View.VISIBLE);
+                    speechProgress.setVisibility(View.VISIBLE);
                 } else {
                     speechRecognizer.stopListening();
                     listenSpeech = false;
-                    speechProgres.setVisibility(View.GONE);
+                    speechProgress.setVisibility(View.GONE);
                 }
                 break;
         }
@@ -159,7 +162,7 @@ public class MainMapActivity extends Activity implements RecognitionListener, Vi
     public void onError(int error) {
         Log.d("Loger", "onError");
         listenSpeech = false;
-        speechProgres.setVisibility(View.GONE);
+        speechProgress.setVisibility(View.GONE);
     }
 
     @Override
@@ -169,9 +172,11 @@ public class MainMapActivity extends Activity implements RecognitionListener, Vi
         for (int i = 0; i < strlist.size(); i++) {
             Log.d("Loger", "result=" + strlist.get(i));
         }
+        String result =(String)strlist.get(0);
+        textResult.setText( result.substring(0,1).toUpperCase() + result.substring(1));
         speechRecognizer.stopListening();
         listenSpeech = false;
-        speechProgres.setVisibility(View.GONE);
+        speechProgress.setVisibility(View.GONE);
     }
 
     @Override
