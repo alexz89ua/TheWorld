@@ -8,6 +8,7 @@ public class QuestionEntity {
     public String image_url;
     public String question;
     public String answer;
-    public long lat;
-    public long lon;
+    public double lat;
+    public double lon;
+    public int zoom;
 }

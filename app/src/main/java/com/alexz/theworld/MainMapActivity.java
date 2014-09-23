@@ -1,6 +1,7 @@
 package com.alexz.theworld;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
@@ -10,28 +11,36 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.alexz.theworld.entity.Questions;
 import com.alexz.theworld.utils.RippleDrawable;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.octo.android.robospice.persistence.exception.SpiceException;
+import com.octo.android.robospice.request.listener.RequestListener;
 
 import java.util.ArrayList;
 
 
-public class MainMapActivity extends Activity implements RecognitionListener, View.OnClickListener {
+public class MainMapActivity extends BaseSpiceActivity implements RecognitionListener, View.OnClickListener {
     private SpeechRecognizer speechRecognizer;
     private View mDecorView;
+    private String writeAnswer;
+    private LatLng focus;
     private GoogleMap map;
     private RelativeLayout card;
     private boolean listenSpeech = false;
     private ProgressBar speechProgress;
-    private TextView textResult;
+    private TextView textResult, questions;
+    private ImageView image;
+    private OnResultTaskListener onResultTaskListener = new OnResultTaskListener();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +66,9 @@ public class MainMapActivity extends Activity implements RecognitionListener, Vi
                 .position(sydney));
 
         initViews();
+
+        GetRequest getRequest = new GetRequest();
+        getSpiceManager().execute(getRequest, onResultTaskListener);
     }
 
 
@@ -69,6 +81,8 @@ public class MainMapActivity extends Activity implements RecognitionListener, Vi
         card.setOnClickListener(this);
         speechProgress = (ProgressBar) findViewById(R.id.speechProgress);
         textResult = (TextView) findViewById(R.id.text_result);
+        questions = (TextView) findViewById(R.id.question);
+        image = (ImageView) findViewById(R.id.image);
 
         map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
@@ -175,7 +189,16 @@ public class MainMapActivity extends Activity implements RecognitionListener, Vi
         textResult.setText( result.substring(0,1).toUpperCase() + result.substring(1));
         speechRecognizer.stopListening();
         listenSpeech = false;
-        speechProgress.setVisibility(View.GONE);
+
+        if (writeAnswer.contains(result)){
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(focus, 13));
+
+            map.addMarker(new MarkerOptions()
+                    .title("Sydney")
+                    .snippet("The most populous city in Australia.")
+                    .position(focus));
+            speechProgress.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -188,5 +211,25 @@ public class MainMapActivity extends Activity implements RecognitionListener, Vi
         Log.d("Loger", "onEvent");
     }
 
+
+
+
+    public final class OnResultTaskListener implements RequestListener<Questions> {
+        @Override
+        public void onRequestFailure(SpiceException spiceException) {
+            Log.i("Loger", "Error: " + spiceException.getMessage());
+        }
+
+        @Override
+        public void onRequestSuccess(Questions result) {
+            if (result != null && result.size() > 0){
+                questions.setText(result.get(0).question);
+                writeAnswer = result.get(0).answer;
+                focus = new LatLng(result.get(0).lat, result.get(0).lon);
+
+                card.setVisibility(View.VISIBLE);
+            }
+        }
+    }
 
 }
