@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.alexz.theworld.entity.QuestionEntity;
 import com.alexz.theworld.entity.Questions;
 import com.alexz.theworld.utils.RippleDrawable;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -221,8 +222,9 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
         }
 
         @Override
-        public void onRequestSuccess(Questions result) {
-            if (result != null && result.size() > 0){
+        public void onRequestSuccess(Questions ansver) {
+            if (ansver != null && ansver.questions.size() > 0){
+                ArrayList<QuestionEntity> result = ansver.questions;
                 questions.setText(result.get(0).question);
                 writeAnswer = result.get(0).answer;
                 focus = new LatLng(result.get(0).lat, result.get(0).lon);
