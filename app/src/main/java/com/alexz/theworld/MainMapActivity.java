@@ -45,6 +45,7 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
     private ImageView image;
     private OnResultTaskListener onResultTaskListener = new OnResultTaskListener();
     private ArrayList<QuestionEntity> questionsArray;
+    private Handler myHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,7 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
         mDecorView = getWindow().getDecorView();
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(getApplicationContext());
         speechRecognizer.setRecognitionListener(this);
+        myHandler = new Handler();
 
         // Get a handle to the Map Fragment
         map = ((MapFragment) getFragmentManager()
@@ -196,14 +198,20 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
         speechProgress.setVisibility(View.GONE);
 
         if (writeAnswer.contains(result)) {
-            card.setVisibility(View.GONE);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(focus, zoom));
 
-            map.addMarker(new MarkerOptions()
-                    .title("Sydney")
-                    .snippet("The most populous city in Australia.")
-                    .position(focus));
-            initQuestion();
+            final Runnable next = new Runnable() {
+                @Override
+                public void run() {
+                    card.setVisibility(View.GONE);
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(focus, zoom));
+
+                    map.addMarker(new MarkerOptions()
+                            .title(writeAnswer)
+                            .position(focus));
+                    initQuestion();
+                }
+            };
+            myHandler.postDelayed(next, 5000);
         }
     }
 
@@ -235,8 +243,6 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
 
 
     private void initQuestion() {
-
-        final Handler myHandler = new Handler();
 
         final Runnable speech = new Runnable() {
             @Override
