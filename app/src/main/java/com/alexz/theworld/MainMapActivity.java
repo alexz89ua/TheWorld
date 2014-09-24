@@ -1,7 +1,5 @@
 package com.alexz.theworld;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
@@ -24,6 +22,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
 
@@ -42,6 +41,7 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
     private TextView textResult, questions;
     private ImageView image;
     private OnResultTaskListener onResultTaskListener = new OnResultTaskListener();
+    private ArrayList<QuestionEntity> questionsArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,11 +225,12 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
         @Override
         public void onRequestSuccess(Questions ansver) {
             if (ansver != null && ansver.questions.size() > 0){
+                questionsArray = ansver.questions;
                 ArrayList<QuestionEntity> result = ansver.questions;
                 questions.setText(result.get(0).question);
                 writeAnswer = result.get(0).answer;
                 focus = new LatLng(result.get(0).lat, result.get(0).lon);
-
+                ImageLoader.getInstance().displayImage(result.get(0).image_url, image);
                 card.setVisibility(View.VISIBLE);
             }
         }
