@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -21,6 +22,8 @@ import com.alexz.theworld.utils.RippleDrawable;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.StreetViewPanorama;
+import com.google.android.gms.maps.StreetViewPanoramaFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -28,12 +31,12 @@ import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 
 public class MainMapActivity extends BaseSpiceActivity implements RecognitionListener, View.OnClickListener {
     private SpeechRecognizer speechRecognizer;
     private View mDecorView;
+    private ImageButton game;
     private String writeAnswer;
     private LatLng focus;
     private int zoom;
@@ -46,6 +49,10 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
     private OnResultTaskListener onResultTaskListener = new OnResultTaskListener();
     private ArrayList<QuestionEntity> questionsArray;
     private Handler myHandler;
+    private StreetViewPanorama mSvp;
+    private LatLng SAN_FRAN = new LatLng(37.765927, -122.449972);
+    private RelativeLayout streetView;
+    private int questionNum = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,26 +62,39 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(getApplicationContext());
         speechRecognizer.setRecognitionListener(this);
         myHandler = new Handler();
+        setUpStreetViewPanoramaIfNeeded(savedInstanceState);
+
+        // no sleep fot this screen
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // Get a handle to the Map Fragment
         map = ((MapFragment) getFragmentManager()
                 .findFragmentById(R.id.map)).getMap();
 
-        map.setMyLocationEnabled(false);
+        map.setMyLocationEnabled(true);
         map.getUiSettings().setZoomControlsEnabled(false);
 
-        LatLng sydney = new LatLng(-33.867, 151.206);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 13));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(SAN_FRAN, 13));
 
         map.addMarker(new MarkerOptions()
-                .title("Sydney")
-                .snippet("The most populous city in Australia.")
-                .position(sydney));
+                .title("New York City")
+                .position(SAN_FRAN));
 
         initViews();
 
         GetRequest getRequest = new GetRequest();
         getSpiceManager().execute(getRequest, onResultTaskListener);
+    }
+
+
+    private void setUpStreetViewPanoramaIfNeeded(Bundle savedInstanceState) {
+        if (mSvp == null) {
+            mSvp = ((StreetViewPanoramaFragment)
+                    getFragmentManager().findFragmentById(R.id.streetviewpanorama))
+                    .getStreetViewPanorama();
+            mSvp.setPosition(SAN_FRAN);
+            streetView = (RelativeLayout) findViewById(R.id.street_view);
+        }
     }
 
 
@@ -89,15 +109,34 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
         textResult = (TextView) findViewById(R.id.text_result);
         tvQuestion = (TextView) findViewById(R.id.question);
         image = (ImageView) findViewById(R.id.image);
+        game = (ImageButton) findViewById(R.id.game);
+        game.setOnClickListener(this);
+
+        map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                initQuestion();
+            }
+        });
 
         map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                initQuestion();
+                mSvp.setPosition(latLng, 1000000);
+                streetView.setVisibility(View.VISIBLE);
             }
         });
     }
 
+
+    @Override
+    public void onBackPressed() {
+        if (streetView.getVisibility() == View.VISIBLE) {
+            streetView.setVisibility(View.GONE);
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -147,6 +186,9 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
                     listenSpeech = false;
                     speechProgress.setVisibility(View.GONE);
                 }
+                break;
+            case R.id.game:
+                openQuestion();
                 break;
         }
     }
@@ -211,7 +253,7 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
                     initQuestion();
                 }
             };
-            myHandler.postDelayed(next, 1500);
+            myHandler.postDelayed(next, 1000);
         }
     }
 
@@ -236,14 +278,24 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
         public void onRequestSuccess(Questions ansver) {
             if (ansver != null && ansver.questions.size() > 0) {
                 questionsArray = ansver.questions;
-                initQuestion();
             }
         }
     }
 
 
     private void initQuestion() {
+        final Runnable question = new Runnable() {
+            @Override
+            public void run() {
+                openQuestion();
+            }
 
+        };
+        myHandler.postDelayed(question, 4000);
+    }
+
+
+    private void openQuestion() {
         final Runnable speech = new Runnable() {
             @Override
             public void run() {
@@ -255,26 +307,24 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
             }
         };
 
-        final Runnable question = new Runnable() {
-            @Override
-            public void run() {
-                int number = new Random().nextInt(questionsArray.size());
 
-                tvQuestion.setText(questionsArray.get(number).question);
-                writeAnswer = questionsArray.get(number).answer.toLowerCase();
-                focus = new LatLng(questionsArray.get(number).lat, questionsArray.get(number).lon);
-                zoom = questionsArray.get(number).zoom;
-                textResult.setText("");
-                image.setImageDrawable(getResources().getDrawable(R.drawable.gallery));
-                ImageLoader.getInstance().displayImage(questionsArray.get(number).image_url, image);
-                card.setVisibility(View.VISIBLE);
+        tvQuestion.setText(questionsArray.get(questionNum).question);
+        writeAnswer = questionsArray.get(questionNum).answer.toLowerCase();
+        focus = new LatLng(questionsArray.get(questionNum).lat, questionsArray.get(questionNum).lon);
+        zoom = questionsArray.get(questionNum).zoom;
+        textResult.setText("");
+        image.setImageDrawable(getResources().getDrawable(R.drawable.gallery));
+        ImageLoader.getInstance().displayImage(questionsArray.get(questionNum).image_url, image);
+        card.setVisibility(View.VISIBLE);
 
-                myHandler.postDelayed(speech, 5000);
-            }
+        questionNum++;
 
-        };
+        if (questionNum > questionsArray.size()-1) {
+            questionNum = 0;
+        }
 
-        myHandler.postDelayed(question, 7000);
+        myHandler.postDelayed(speech, 4000);
+
     }
 
 }

@@ -1,6 +1,7 @@
 package com.alexz.theworld;
 
 import android.app.Application;
+import android.graphics.Bitmap;
 
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiscCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -24,6 +25,8 @@ public class TheWorldApp extends Application {
         if (!ImageLoader.getInstance().isInited()) {
             ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
                     getApplicationContext())
+                    .memoryCacheExtraOptions(200, 200)
+                    .diskCacheExtraOptions(200, 200, null)
                     .defaultDisplayImageOptions(defaultOptions)
                     .discCache(new UnlimitedDiscCache(getCacheDir()))
                     .denyCacheImageMultipleSizesInMemory().build();
