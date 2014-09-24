@@ -1,5 +1,5 @@
 {"questions":[{"id":0,"image_url":"http://travelukr.com.ua/wp-content/uploads/2014/09/berlin1.jpg","question":"Самый крупный и самый населённый город Германии","answer":"Берлин","lat":52.516667,"lon":13.383333,"zoom":13},
 {"id":1,"image_url":"https://upload.wikimedia.org/wikipedia/commons/a/ab/Panorama_of_Moscow_Kremlin.jpg","question":"Какая страна проявила агрессию против Украины в 2014 году?","answer":"Россия","lat":55.751667,"lon":37.617778,"zoom":3},
 {"id":2,"image_url":"http://www.ethnonet.ru/wp-content/uploads/2014/03/e3e352.jpg","question":"Французская колония Америки","answer":"Канада","lat":45.4,"lon":-75.666667,"zoom":8},
-{"id":3,"image_url":https://ru.wikipedia.org/wiki/%D0%9A%D0%B8%D0%B5%D0%B2#mediaviewer/File:Kyiv_Golden_Gate_-_011.jpg","question":"Самая классная страна в мире!","answer":"Украина","lat":50.4505,"lon":30.523,"zoom":8},
+{"id":3,"image_url":"https://ru.wikipedia.org/wiki/%D0%9A%D0%B8%D0%B5%D0%B2#mediaviewer/File:Kyiv_Golden_Gate_-_011.jpg","question":"Самая классная страна в мире!","answer":"Украина","lat":50.4505,"lon":30.523,"zoom":8},
 {"id":4,"image_url":"https://ru.wikipedia.org/wiki/%D0%91%D1%80%D1%8E%D1%81%D1%81%D0%B5%D0%BB%D1%8C#mediaviewer/File:Basilica_of_the_Sacred_Heart.jpg","question":"Столица Бельгии","answer":"Брюсель","lat":50.846667,"lon":4.3525,"zoom":11}]}
