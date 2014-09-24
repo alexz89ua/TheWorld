@@ -1,3 +1,3 @@
-{"questions":[{"id":0,"http://travelukr.com.ua/wp-content/uploads/2014/09/berlin1.jpg","question":"Самый крупный и самый населённый город Германии","answer":"Берлин","lat":52.516667,"lon":13.383333,"zoom":13},
+{"questions":[{"id":0,"image_url":"http://travelukr.com.ua/wp-content/uploads/2014/09/berlin1.jpg","question":"Самый крупный и самый населённый город Германии","answer":"Берлин","lat":52.516667,"lon":13.383333,"zoom":13},
 {"id":1,"image_url":"https://upload.wikimedia.org/wikipedia/commons/a/ab/Panorama_of_Moscow_Kremlin.jpg","question":"Какая страна проявила агрессию против Украины в 2014 году?","answer":"Россия","lat":55.751667,"lon":37.617778,"zoom":5},
 {"id":2,"image_url":"http://www.ethnonet.ru/wp-content/uploads/2014/03/e3e352.jpg","question":"Французская колонизация Америки","answer":"Канада","lat":45.4,"lon":-75.666667,"zoom":8}]}
