@@ -247,7 +247,7 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
                 focus=new LatLng(questionsArray.get(number).lat,questionsArray.get(number).lon);
                 zoom=questionsArray.get(number).zoom;
                 textResult.setText("");
-                image.setBackgroundResource(R.drawable.gallery);
+                image.setImageDrawable(getResources().getDrawable(R.drawable.gallery));
                 ImageLoader.getInstance().displayImage(questionsArray.get(number).image_url, image);
                 card.setVisibility(View.VISIBLE);
             }
