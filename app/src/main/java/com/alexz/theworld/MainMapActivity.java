@@ -211,7 +211,7 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
                     initQuestion();
                 }
             };
-            myHandler.postDelayed(next, 5000);
+            myHandler.postDelayed(next, 1500);
         }
     }
 
