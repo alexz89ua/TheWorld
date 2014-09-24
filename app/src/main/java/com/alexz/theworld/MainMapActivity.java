@@ -29,8 +29,6 @@ import com.octo.android.robospice.request.listener.RequestListener;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 
 public class MainMapActivity extends BaseSpiceActivity implements RecognitionListener, View.OnClickListener {
@@ -205,6 +203,7 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
                     .title("Sydney")
                     .snippet("The most populous city in Australia.")
                     .position(focus));
+            initQuestion();
         }
     }
 
@@ -237,24 +236,39 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
 
     private void initQuestion() {
 
-        runOnUiThread(new Runnable() {
+        final Handler myHandler = new Handler();
+
+        final Runnable speech = new Runnable() {
+            @Override
+            public void run() {
+                if (!listenSpeech) {
+                    speechRecognizer.startListening(RecognizerIntent.getVoiceDetailsIntent(getApplicationContext()));
+                    listenSpeech = true;
+                    speechProgress.setVisibility(View.VISIBLE);
+                }
+            }
+        };
+
+        final Runnable question = new Runnable() {
             @Override
             public void run() {
                 int number = new Random().nextInt(questionsArray.size());
 
                 tvQuestion.setText(questionsArray.get(number).question);
-                writeAnswer=questionsArray.get(number).answer.toLowerCase();
-                focus=new LatLng(questionsArray.get(number).lat,questionsArray.get(number).lon);
-                zoom=questionsArray.get(number).zoom;
+                writeAnswer = questionsArray.get(number).answer.toLowerCase();
+                focus = new LatLng(questionsArray.get(number).lat, questionsArray.get(number).lon);
+                zoom = questionsArray.get(number).zoom;
                 textResult.setText("");
                 image.setImageDrawable(getResources().getDrawable(R.drawable.gallery));
                 ImageLoader.getInstance().displayImage(questionsArray.get(number).image_url, image);
                 card.setVisibility(View.VISIBLE);
+
+                myHandler.postDelayed(speech, 5000);
             }
 
-        });
+        };
 
-
+        myHandler.postDelayed(question, 7000);
     }
 
 }
