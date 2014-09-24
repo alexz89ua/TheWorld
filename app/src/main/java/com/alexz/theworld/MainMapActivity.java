@@ -1,6 +1,7 @@
 package com.alexz.theworld;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -27,6 +28,9 @@ import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
 
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 
 public class MainMapActivity extends BaseSpiceActivity implements RecognitionListener, View.OnClickListener {
@@ -34,11 +38,12 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
     private View mDecorView;
     private String writeAnswer;
     private LatLng focus;
+    private int zoom;
     private GoogleMap map;
     private RelativeLayout card;
     private boolean listenSpeech = false;
     private ProgressBar speechProgress;
-    private TextView textResult, questions;
+    private TextView textResult, tvQuestion;
     private ImageView image;
     private OnResultTaskListener onResultTaskListener = new OnResultTaskListener();
     private ArrayList<QuestionEntity> questionsArray;
@@ -82,13 +87,13 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
         card.setOnClickListener(this);
         speechProgress = (ProgressBar) findViewById(R.id.speechProgress);
         textResult = (TextView) findViewById(R.id.text_result);
-        questions = (TextView) findViewById(R.id.question);
+        tvQuestion = (TextView) findViewById(R.id.question);
         image = (ImageView) findViewById(R.id.image);
 
-        map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
-            public void onMapLongClick(LatLng latLng) {
-                card.setVisibility(View.VISIBLE);
+            public void onMapClick(LatLng latLng) {
+                initQuestion();
             }
         });
     }
@@ -186,15 +191,15 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
         for (int i = 0; i < strlist.size(); i++) {
             Log.d("Loger", "result=" + strlist.get(i));
         }
-        String result =(String)strlist.get(0);
-        textResult.setText( result.substring(0,1).toUpperCase() + result.substring(1));
+        String result = (String) strlist.get(0);
+        textResult.setText(result.substring(0, 1).toUpperCase() + result.substring(1));
         speechRecognizer.stopListening();
         listenSpeech = false;
         speechProgress.setVisibility(View.GONE);
 
-        if (writeAnswer.contains(result)){
+        if (writeAnswer.contains(result)) {
             card.setVisibility(View.GONE);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(focus, 13));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(focus, zoom));
 
             map.addMarker(new MarkerOptions()
                     .title("Sydney")
@@ -214,8 +219,6 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
     }
 
 
-
-
     public final class OnResultTaskListener implements RequestListener<Questions> {
         @Override
         public void onRequestFailure(SpiceException spiceException) {
@@ -224,16 +227,34 @@ public class MainMapActivity extends BaseSpiceActivity implements RecognitionLis
 
         @Override
         public void onRequestSuccess(Questions ansver) {
-            if (ansver != null && ansver.questions.size() > 0){
+            if (ansver != null && ansver.questions.size() > 0) {
                 questionsArray = ansver.questions;
-                ArrayList<QuestionEntity> result = ansver.questions;
-                questions.setText(result.get(0).question);
-                writeAnswer = result.get(0).answer;
-                focus = new LatLng(result.get(0).lat, result.get(0).lon);
-                ImageLoader.getInstance().displayImage(result.get(0).image_url, image);
-                card.setVisibility(View.VISIBLE);
+                initQuestion();
             }
         }
+    }
+
+
+    private void initQuestion() {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                int number = new Random().nextInt(questionsArray.size());
+
+                tvQuestion.setText(questionsArray.get(number).question);
+                writeAnswer=questionsArray.get(number).answer.toLowerCase();
+                focus=new LatLng(questionsArray.get(number).lat,questionsArray.get(number).lon);
+                zoom=questionsArray.get(number).zoom;
+                textResult.setText("");
+                image.setBackgroundResource(R.drawable.gallery);
+                ImageLoader.getInstance().displayImage(questionsArray.get(number).image_url, image);
+                card.setVisibility(View.VISIBLE);
+            }
+
+        });
+
+
     }
 
 }
